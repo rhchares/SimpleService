@@ -1,6 +1,6 @@
-package dev.charles.TestContainer.errors.exception;
+package dev.charles.SimpleService.errors.exception;
 
-import dev.charles.TestContainer.errors.errorcode.CustomErrorCode;
+import dev.charles.SimpleService.errors.errorcode.CustomErrorCode;
 
 
 public class NotFoundResourceException extends RestApiException{

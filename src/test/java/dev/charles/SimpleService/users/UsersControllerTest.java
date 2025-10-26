@@ -1,7 +1,7 @@
-package dev.charles.TestContainer.users;
+package dev.charles.SimpleService.users;
 
-import dev.charles.TestContainer.errors.errorcode.CommonErrorCode;
-import dev.charles.TestContainer.errors.errorcode.ErrorCode;
+import dev.charles.SimpleService.errors.errorcode.CommonErrorCode;
+import dev.charles.SimpleService.errors.errorcode.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

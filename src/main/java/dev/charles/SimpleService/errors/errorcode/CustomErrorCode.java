@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.errors.errorcode;
+package dev.charles.SimpleService.errors.errorcode;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

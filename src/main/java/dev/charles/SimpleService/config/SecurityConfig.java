@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.config;
+package dev.charles.SimpleService.config;
 
 import org.springframework.context.annotation.Configuration;
 

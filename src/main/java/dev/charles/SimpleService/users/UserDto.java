@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.users;
+package dev.charles.SimpleService.users;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

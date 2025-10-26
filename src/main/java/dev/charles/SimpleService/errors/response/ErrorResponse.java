@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.errors.response;
+package dev.charles.SimpleService.errors.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

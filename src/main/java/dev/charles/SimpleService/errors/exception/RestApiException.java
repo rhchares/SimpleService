@@ -1,6 +1,6 @@
-package dev.charles.TestContainer.errors.exception;
+package dev.charles.SimpleService.errors.exception;
 
-import dev.charles.TestContainer.errors.errorcode.ErrorCode;
+import dev.charles.SimpleService.errors.errorcode.ErrorCode;
 import lombok.Getter;
 
 @Getter

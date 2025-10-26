@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.users;
+package dev.charles.SimpleService.users;
 
 
 import org.junit.jupiter.api.BeforeEach;

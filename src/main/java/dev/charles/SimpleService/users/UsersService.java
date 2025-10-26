@@ -1,7 +1,7 @@
-package dev.charles.TestContainer.users;
+package dev.charles.SimpleService.users;
 
-import dev.charles.TestContainer.errors.exception.DuplicateResourceException;
-import dev.charles.TestContainer.errors.exception.NotFoundResourceException;
+import dev.charles.SimpleService.errors.exception.DuplicateResourceException;
+import dev.charles.SimpleService.errors.exception.NotFoundResourceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

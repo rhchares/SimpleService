@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.errors.errorcode;
+package dev.charles.SimpleService.errors.errorcode;
 
 import org.springframework.http.HttpStatus;
 

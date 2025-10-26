@@ -1,4 +1,4 @@
-package dev.charles.TestContainer.users;
+package dev.charles.SimpleService.users;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
