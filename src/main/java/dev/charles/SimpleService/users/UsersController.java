@@ -1,7 +1,7 @@
 package dev.charles.SimpleService.users;
 
+import dev.charles.SimpleService.CustomPageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,8 +20,8 @@ public class UsersController {
      * @param email 조회할 사용자의 email
      * @return 사용자 데이터 (UserDto)
      */
-    @GetMapping("/{email}")
-    ResponseEntity<UserDto> getUser(@Validated @PathVariable("email") String email ){
+    @GetMapping
+    ResponseEntity<UserDto> getUser(@Validated @RequestParam("email") String email ){
         UserDto userDto =  usersService.getUserByEmail(email);
         return new ResponseEntity<>(userDto,HttpStatus.OK);
     }
@@ -29,13 +29,12 @@ public class UsersController {
     /**
      * GET /api/users/paged
      * 사용자의 목록을 페이징 처리하여 반환합니다.
-     * @param offset 조회할 페이지 번호 (0부터 시작, 기본값 0)
      * @return 페이징된 사용자 데이터 (Page<UserDto>)
      */
 
     @GetMapping("/paged")
-    ResponseEntity<Page<UserDto>> getUsers(@RequestParam Integer offset){
-        var users = usersService.getUsers(offset);
+    ResponseEntity<CustomPageResponse<UserDto>> getUsers(@RequestParam(defaultValue = "0") final Integer offset){
+        CustomPageResponse<UserDto> users = new CustomPageResponse<>(usersService.getUsers(offset));
         return new ResponseEntity<>(users,HttpStatus.OK);
     }
 

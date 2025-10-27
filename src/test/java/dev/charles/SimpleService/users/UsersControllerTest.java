@@ -46,13 +46,14 @@ class UsersControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/users/{email} 요청 시, 200 OK와 사용자 DTO를 반환해야 한다.")
+    @DisplayName("When invoking GET /api/users, the response status is 200 OK and the response body contains the User DTO .")
     void getUser_ShouldReturnUserDto() throws Exception {
         // Given
         given(usersService.getUserByEmail(targetEmail)).willReturn(testUserDto);
 
         // When & Then
-        mockMvc.perform(get("/api/users/{email}", targetEmail)
+        mockMvc.perform(get("/api/users")
+                        .param("email", targetEmail)
                         .accept(MediaType.APPLICATION_JSON)) // JSON 응답을 기대
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -64,15 +65,15 @@ class UsersControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/users/paged 요청 시, 200 OK와 페이징된 사용자 목록을 반환해야 한다.")
+    @DisplayName("When invoking GET /api/users/paged, the response status is 200 OK and the response body contains the paged user list.")
     void getUsers_ShouldReturnPagedUsers() throws Exception {
         // Given
-        final int offset = 1;
+        final int offset = 0;
         final int pageSize = 10;
         final PageRequest pageable = PageRequest.of(offset, pageSize);
 
         List<UserDto> userList = List.of(testUserDto);
-        Page<UserDto> mockPage = new PageImpl<>(userList, pageable, 20);
+        Page<UserDto> mockPage = new PageImpl<>(userList, pageable, 1);
 
         given(usersService.getUsers(offset)).willReturn(mockPage);
 
@@ -84,16 +85,14 @@ class UsersControllerTest {
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content[0].email").value(targetEmail)) // 데이터 검증
-                .andExpect(jsonPath("$.totalElements").value(20)); // 페이징 메타데이터 검증
+                .andExpect(jsonPath("$.page.totalElements").value(1)); // 페이징 메타데이터 검증
 
         // Service 호출 검증 (offset=1로 호출되었는지)
         then(usersService).should().getUsers(offset);
     }
 
-    // ------------------- C R E A T E -------------------
-
     @Test
-    @DisplayName("POST /api/users 요청 시, 201 CREATED 상태를 반환하고 Service를 호출해야 한다.")
+    @DisplayName("When invoking POST /api/users, the response status is 201 CREATED and the corresponding Service method is called.")
     void createUser_ShouldReturn201Created() throws Exception {
         // Given
         // usersService.create()는 void (혹은 DTO 반환)이며, 여기서는 서비스 호출만 검증
@@ -113,11 +112,9 @@ class UsersControllerTest {
     }
 
     @Test
-    @DisplayName("Response with BAD_REQUEST When invalid UserDto")
+    @DisplayName("When invoking POST /api/users with an invalid User DTO, the response status is 400 BAD REQUEST.")
     void CreateUserThrowValidationException() throws Exception {
         // Given
-        // usersService.create()는 void (혹은 DTO 반환)이며, 여기서는 서비스 호출만 검증
-        // Controller 코드가 new ResponseEntity<>(null, HttpStatus.CREATED)를 반환하므로 DTO 반환은 테스트하지 않음.
         UserDto invalid = new UserDto("d", "d");
 
         ErrorCode error = CommonErrorCode.INVALID_PARAMETER;
@@ -138,10 +135,8 @@ class UsersControllerTest {
         then(usersService).shouldHaveNoInteractions();
     }
 
-    // ------------------- U P D A T E -------------------
-
     @Test
-    @DisplayName("PUT /api/users/{id} 요청 시, 200 OK와 수정된 DTO를 반환해야 한다.")
+    @DisplayName("When invoking GET /api/users/paged, the response status is 200 OK and the response body contains the paged user list.")
     void updateUser_ShouldReturnUpdatedUser() throws Exception {
         // Given
         UserDto updatedDto = new UserDto("updatedName", targetEmail);
@@ -160,7 +155,7 @@ class UsersControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/users/{id} 요청 시, Validation 오류로 400 Status 발생")
+    @DisplayName("When invoking PUT /api/users/{id}, a validation error results in a 400 BAD REQUEST status.")
     void UpdateUserValidationException() throws Exception {
         // Given
         UserDto updatedDto = new UserDto("up", targetEmail);
@@ -182,10 +177,8 @@ class UsersControllerTest {
         then(usersService).shouldHaveNoInteractions();
     }
 
-    // ------------------- D E L E T E -------------------
-
     @Test
-    @DisplayName("DELETE /api/users/{email} 요청 시, 204 NO CONTENT를 반환하고 Service를 호출해야 한다.")
+    @DisplayName("When invoking DELETE /api/users/{email}, the response status is 204 NO CONTENT and the corresponding Service method is called.")
     void deleteUser_ShouldReturn204NoContent() throws Exception {
         // Given: usersService.delete()는 void 반환이므로 Mocking 불필요
 
