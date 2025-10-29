@@ -51,27 +51,15 @@ public class GoogleOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
         };
     }
 
-    private HttpHeaders requestHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        return headers;
-    }
-
     @Override
     public OAuth2AuthenticatedPrincipal introspect(String token) {
-        logger.info("introspect");
         RequestEntity<?> requestEntity = this.requestEntityConverter.convert(token);
         if (requestEntity == null) {
             throw new OAuth2IntrospectionException("requestEntityConverter returned a null entity");
         }
         ResponseEntity<Map<String, Object>> responseEntity = makeRequest(requestEntity);
-        logger.info(responseEntity);
         Map<String, Object> claims = adaptToNimbusResponse(responseEntity);
-        logger.info(claims);
-        logger.info("step5");
-
         OAuth2TokenIntrospectionClaimAccessor accessor = convertClaimsSet(claims);
-        logger.info("step6");
         return this.authenticationConverter.convert(accessor);
     }
 
