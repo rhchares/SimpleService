@@ -1,19 +1,13 @@
 package dev.charles.SimpleService.users;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.sql.Timestamp;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Users{
+@ToString
+public class Users extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,14 +17,6 @@ public class Users{
 
     @Column(nullable = false)
     private String email;
-
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private Timestamp createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Timestamp updatedAt;
 
     @Builder
     public Users(String username, String email){
@@ -43,8 +29,4 @@ public class Users{
         this.email = userDto.getEmail();
     }
 
-    @Override
-    public String toString() {
-        return String.format("id: %d username: %s email: %s", id, username , email);
-    }
 }
