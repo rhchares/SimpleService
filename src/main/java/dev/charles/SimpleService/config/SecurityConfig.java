@@ -26,17 +26,16 @@ import java.time.temporal.ChronoUnit;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-//    @Bean
-//    AuthenticationEntryPoint authenticationEntryPoint = new BearerTokenAuthenticationEntryPoint();
-
     @Bean
     SecurityFilterChain filterChain (HttpSecurity http, OpaqueTokenIntrospector introspector) throws Exception {
-
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize-> authorize
-                                .requestMatchers(HttpMethod.GET, "/api/users","/api/users/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/users","/api/users/**",
+                                        "/api/posts","/api/posts/**"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                 ).oauth2ResourceServer(oauth2 -> oauth2
                         .opaqueToken(opaqueToken -> opaqueToken
