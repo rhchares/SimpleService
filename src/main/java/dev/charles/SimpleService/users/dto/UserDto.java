@@ -8,11 +8,13 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.PersistenceCreator;
 
 @Getter
 @NoArgsConstructor
+@ToString
 public class UserDto {
     @Length(min = 5, max = 15, message = "5이상 15이하 글자를 입력하세요.")
     @Pattern(regexp = "^[a-zA-Z가-힣][a-zA-Z가-힣0-9]{4,}$", message = "올바른 이름을 입력하세요.")
