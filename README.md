@@ -19,7 +19,7 @@ Ensure you have the following software installed on your system:
 1. Clone the Repository\
     Clone the source code from your Git repository:
     ```Bash
-    git clone https://github.com/CharlesK96/SimpleService.git
+    git clone https://github.com/rhcharles/SimpleService.git
     cd SimpleService
     ```
 
@@ -50,3 +50,6 @@ Use your build tool to compile the project and download all dependencies.
 + Testing: JUnit 5, Mockito, Spring Boot Test, Testcontainers (for PostgreSQL)
 + Database: PostgreSQL (runtime)
 + Development: Spring Boot Docker Compose Support
+  📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
