@@ -34,7 +34,8 @@ public class SecurityConfig {
                         authorize-> authorize
                                 .requestMatchers(HttpMethod.GET,
                                         "/api/users","/api/users/**",
-                                        "/api/posts","/api/posts/**"
+                                        "/api/posts","/api/posts/**",
+                                        "/api/comments", "/api/comments/**"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 ).oauth2ResourceServer(oauth2 -> oauth2

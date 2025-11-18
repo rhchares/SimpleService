@@ -1,5 +1,6 @@
 package dev.charles.SimpleService.users.domain;
 
+import dev.charles.SimpleService.comments.domain.Comments;
 import dev.charles.SimpleService.posts.domain.Posts;
 import dev.charles.SimpleService.users.dto.UserDto;
 import jakarta.persistence.*;
@@ -25,6 +26,10 @@ public class Users extends BaseEntity{
 
     @OneToMany(mappedBy = "createdBy" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Posts> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments = new ArrayList<>();
+
 
     @Version
     private Long version;

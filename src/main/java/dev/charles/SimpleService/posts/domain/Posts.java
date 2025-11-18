@@ -1,10 +1,14 @@
 package dev.charles.SimpleService.posts.domain;
 
+import dev.charles.SimpleService.comments.domain.Comments;
 import dev.charles.SimpleService.posts.dto.PostDto;
 import dev.charles.SimpleService.users.domain.BaseEntity;
 import dev.charles.SimpleService.users.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,6 +27,8 @@ public class Posts extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Users createdBy;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments = new ArrayList<>();
     @Version
     private Long version;
 
