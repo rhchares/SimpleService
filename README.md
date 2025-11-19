@@ -1,4 +1,4 @@
-🌟 [SimpleBlogAPI] - TDD-Based Simple User REST API
+🌟 [SimpleBlogAPI] - TDD-Based Simple Blog REST API
 
 🎯 Project Overview
 
