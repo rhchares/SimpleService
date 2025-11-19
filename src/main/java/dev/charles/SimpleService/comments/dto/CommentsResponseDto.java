@@ -1,5 +1,6 @@
 package dev.charles.SimpleService.comments.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import dev.charles.SimpleService.comments.domain.Comments;
 import dev.charles.SimpleService.users.dto.UserDto;
 import lombok.Getter;
@@ -20,17 +21,11 @@ public class CommentsResponseDto {
     private Instant updatedAt;
     private UserDto createdBy; // 작성자 정보
 
-    static public CommentsResponseDto of(Comments comment){
-        return new CommentsResponseDto(comment);
-    }
-
-    public CommentsResponseDto(Comments comment) {
-        this.content = comment.getContent();
-        this.createdAt = comment.getCreatedAt();
-        this.updatedAt = comment.getUpdatedAt();
-        this.createdBy = UserDto.builder()
-                .username(comment.getCreatedBy().getUsername())
-                .email(comment.getCreatedBy().getEmail())
-                .build();
+    @QueryProjection
+    public CommentsResponseDto(String content, Instant createdAt, Instant updatedAt, UserDto createdBy) {
+        this.content = content;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
     }
 }

@@ -29,6 +29,7 @@ public class UserDto {
     private String email;
 
     @PersistenceCreator
+    @QueryProjection
     @Builder
     public UserDto(String email, String username) {
         this.email = email;

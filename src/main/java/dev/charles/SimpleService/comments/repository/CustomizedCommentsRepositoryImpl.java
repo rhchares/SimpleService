@@ -2,7 +2,11 @@ package dev.charles.SimpleService.comments.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dev.charles.SimpleService.comments.domain.QComments;
 import dev.charles.SimpleService.comments.dto.CommentsResponseDto;
+import dev.charles.SimpleService.comments.dto.QCommentsResponseDto;
+import dev.charles.SimpleService.users.domain.QUsers;
+import dev.charles.SimpleService.users.dto.QUserDto;
 import dev.charles.SimpleService.users.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +16,7 @@ import java.util.List;
 import static dev.charles.SimpleService.comments.domain.QComments.comments;
 import static dev.charles.SimpleService.users.domain.QUsers.users;
 
+
 @RequiredArgsConstructor
 public class CustomizedCommentsRepositoryImpl implements CustomizedCommentsRepository {
     private final JPAQueryFactory queryFactory;
@@ -19,13 +24,10 @@ public class CustomizedCommentsRepositoryImpl implements CustomizedCommentsRepos
     @Override
     public List<CommentsResponseDto> findAllParentsByPostId(Long postId, Pageable pageable) {
         return queryFactory
-                .select(Projections.fields(CommentsResponseDto.class
-                        ,comments.content
+                .select(new QCommentsResponseDto(comments.content
                         ,comments.createdAt
-                        ,comments.updatedAt
-                        ,Projections.fields(UserDto.class,
-                                comments.createdBy.username,
-                                comments.createdBy.email).as("createdBy"))
+                        ,comments.updatedAt, new QUserDto(comments.createdBy.username,
+                        comments.createdBy.email))
                 )
                 .from(comments)
                 .join(comments.createdBy, users)

@@ -1,7 +1,7 @@
 package dev.charles.SimpleService.users.repository;
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dev.charles.SimpleService.users.dto.QUserDto;
 import dev.charles.SimpleService.users.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -12,15 +12,13 @@ import static dev.charles.SimpleService.users.domain.QUsers.users;
 
 
 @RequiredArgsConstructor
-public class CustomizedUserRepositoryImpl implements CustomizedUserRepository{
+public class CustomizedUsersRepositoryImpl implements CustomizedUsersRepository{
     private final JPAQueryFactory queryFactory;
 
     @Override
     public List<UserDto> findAllByKeyword(String keyword, Pageable pageable) {
                 return queryFactory
-                .select(Projections.fields(UserDto.class,
-                        users.username,
-                        users.email))
+                .select(new QUserDto(users.email, users.username))
                 .from(users)
                 .where(
                         users.username.likeIgnoreCase("%"+keyword + "%")
