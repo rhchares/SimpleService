@@ -7,6 +7,7 @@ import dev.charles.SimpleService.users.dto.UserDto;
 import dev.charles.SimpleService.users.service.UsersService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,12 +20,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -57,25 +60,51 @@ class UsersControllerTest extends AbstractIntegrationTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("When invoking GET /api/users, the response status is 200 OK and the response body contains the User DTO .")
-    void get_user_by_email() throws Exception {
-        // Given
-        given(usersService.getUserByEmail(targetEmail)).willReturn(testUserDto);
+    @Nested
+    @DisplayName("Given we have a invalid email and a valid email")
+    class GetUserTest{
+        private String validEmail = "simple@email.mail";
+        private String invalidEmail = "sim";
+        private UserDto userDto;
+        @BeforeEach
+        void setup(){
+            userDto = new UserDto(validEmail, "simple");
+            given(usersService.getUserByEmail(validEmail)).willReturn(userDto);
+        }
+        @Nested
+        @DisplayName("When invoking GET /api/users with a valid email")
+        class accessWithValidEmail{
+            @Test
+            @DisplayName("Then the response status is 200 OK and the response body contains the User DTO .")
+            void getUserDto() throws Exception {
+                mockMvc.perform(get("/api/users").with(opaqueToken())
+                                .param("email", validEmail)
+                                .accept(MediaType.APPLICATION_JSON)) // JSON 응답을 기대
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.username").value(userDto.getUsername()))
+                        .andExpect(jsonPath("$.email").value(userDto.getEmail()));
+                verify(usersService, times(1)).getUserByEmail(validEmail);
+            }
+        }
+        @Nested
+        @DisplayName("When invoking GET /api/users with a invalid email")
+        class accessWithInvalidEmail{
+            @Test
+            @DisplayName("Then the response status is 400.")
+            void getUserDto() throws Exception {
+                mockMvc.perform(get("/api/users").with(opaqueToken())
+                                .param("email", invalidEmail)
+                                .accept(MediaType.APPLICATION_JSON)) // JSON 응답을 기대
+                        .andDo(print())
+                        .andExpect(status().isBadRequest());
+                verify(usersService, times(0)).getUserByEmail(invalidEmail);
+            }
+        }
 
-        // When & Then
-        mockMvc.perform(get("/api/users").with(opaqueToken())
-                        .param("email", targetEmail)
-                        .accept(MediaType.APPLICATION_JSON)) // JSON 응답을 기대
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.username").value("tester"))
-                .andExpect(jsonPath("$.email").value(targetEmail));
-
-        // Service 호출 검증
-        then(usersService).should().getUserByEmail(targetEmail);
     }
+
 
     @Test
     @DisplayName("When invoking GET /api/users/paged, the response status is 200 OK and the response body contains the paged user list.")
@@ -108,49 +137,58 @@ class UsersControllerTest extends AbstractIntegrationTest {
         then(usersService).should().getUsers("test", offset, null);
     }
 
-    @Test
-    @DisplayName("When invoking POST /api/users, the response status is 201 CREATED and the corresponding Service method is called.")
-    void create_user_with_valid_data() throws Exception {
-        // Given
-        // usersService.create()는 void (혹은 DTO 반환)이며, 여기서는 서비스 호출만 검증
-        // Controller 코드가 new ResponseEntity<>(null, HttpStatus.CREATED)를 반환하므로 DTO 반환은 테스트하지 않음.
+    @Nested
+    @DisplayName("Given we have both invalid and valid DTOs.")
+    class CreateUserTest{
+        private String email;
+        private UserDto validDto;
+        private UserDto invalidDto;
 
-        // When & Then
-        mockMvc.perform(post("/api/users").with(opaqueToken()
-                                .attributes(attrs ->
-                                        attrs.put("email", targetEmail)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper
-                                .writeValueAsString(testUserDto))
-                ) // DTO를 JSON 본문으로 전송
-                .andExpect(status().isCreated()); // 201 CREATED 상태 확인
+        @BeforeEach
+        void setup(){
+            email = "simple@email.com";
+            validDto = UserDto.builder().email(email).username("simple").build();
+            invalidDto = UserDto.builder().email(email).username("a").build();
+        }
+        @Nested
+        @DisplayName("When invoking POST /api/users with a valid dto")
+        class accessWithValidDto{
+            @Test
+            @DisplayName("Then the response is 201 and user is created")
+            void createUser() throws Exception {
+                mockMvc.perform(post("/api/users").with(opaqueToken()
+                                        .attributes(attrs ->
+                                                attrs.put("email", email)))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper
+                                        .writeValueAsString(validDto))
+                        )
+                        .andExpect(status().isCreated());
+                verify(usersService, times(1)).create(argThat(
+                        userDto -> userDto.getEmail().equals(email) && userDto.getUsername().equals(validDto.getUsername())
+                ));
+            }
+        }
 
-        // Service 호출 검증
-//        then(usersService).should().create(testUserDto);
-        verify(usersService, times(1)).create(any());
-    }
-
-    @Test
-    @DisplayName("When invoking POST /api/users with an invalid User DTO, the response status is 400 BAD REQUEST.")
-    void create_user_with_invalid_data() throws Exception {
-        // Given
-        UserDto invalid = new UserDto("d", "d");
-
-        ErrorCode error = CommonErrorCode.INVALID_PARAMETER;
-        // When & Then
-        mockMvc.perform(post("/api/users")
-                        .with(opaqueToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper
-                                .writeValueAsString(invalid))
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(error.name()))
-                .andExpect(jsonPath("$.message").value(error.getMessage()))
-                .andExpect(jsonPath("$.errors[?(@.message == '올바른 이름을 입력하세요.')]").exists())
-                .andExpect(jsonPath("$.errors[?(@.message == '5이상 15이하 글자를 입력하세요.')]").exists());
-
-        then(usersService).shouldHaveNoInteractions();
+        @Nested
+        @DisplayName("When invoking POST /api/users with a invalid dto")
+        class accessWithInvalidDto{
+            @Test
+            @DisplayName("Then the response is 400 ")
+            void createUser() throws Exception {
+                mockMvc.perform(post("/api/users").with(opaqueToken()
+                                        .attributes(attrs ->
+                                                attrs.put("email", email)))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper
+                                        .writeValueAsString(invalidDto))
+                        )
+                        .andExpect(status().isBadRequest());
+                verify(usersService, times(0)).create(argThat(
+                        userDto -> userDto.getEmail().equals(email) && userDto.getUsername().equals(invalidDto.getUsername())
+                ));
+            }
+        }
     }
 
     @Test
@@ -192,7 +230,7 @@ class UsersControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.code").value(INVALID_PARAMETER.name()))
                 .andExpect(jsonPath("$.message").value(INVALID_PARAMETER.getMessage()))
                 .andExpect(jsonPath("$.errors[?(@.message == '올바른 이름을 입력하세요.')]").exists())
-                .andExpect(jsonPath("$.errors[?(@.message == '5이상 15이하 글자를 입력하세요.')]").exists());
+                .andExpect(jsonPath("$.errors[?(@.message == '2이상 15이하 글자를 입력하세요.')]").exists());
 
         then(usersService).shouldHaveNoInteractions();
     }

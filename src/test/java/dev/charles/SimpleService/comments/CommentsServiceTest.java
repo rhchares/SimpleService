@@ -4,6 +4,7 @@ import dev.charles.SimpleService.comments.domain.Comments;
 import dev.charles.SimpleService.comments.dto.CommentsRequestDto;
 import dev.charles.SimpleService.comments.repository.CommentsRepository;
 import dev.charles.SimpleService.comments.service.CommentsService;
+import dev.charles.SimpleService.errors.exception.NotAuthorizedException;
 import dev.charles.SimpleService.posts.domain.Posts;
 import dev.charles.SimpleService.posts.dto.PostDto;
 import dev.charles.SimpleService.posts.repository.PostsRepository;
@@ -118,7 +119,7 @@ class CommentsServiceTest {
             void updateCommentWhenNotAuthorized(){
                 Throwable throwable = catchThrowable(()->
                     commentsService.updateComment(commentId, newText, "dd"));
-                assertThat(throwable).isInstanceOf(AuthorizationDeniedException.class);
+                assertThat(throwable).isInstanceOf(NotAuthorizedException.class);
                 verify(commentsRepository, times(1)).findById(commentId);
 
             }

@@ -5,6 +5,7 @@ import dev.charles.SimpleService.posts.dto.PostDto;
 import dev.charles.SimpleService.posts.service.PostsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -50,6 +51,7 @@ class PostsControllerTest extends AbstractIntegrationTest {
                 .apply(springSecurity())
                 .build();
     }
+
 
     @Test
     void save() throws Exception {
