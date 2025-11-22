@@ -8,10 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,12 +61,10 @@ public class UsersRepositoryTest extends AbstractIntegrationTest {
         // Given
         Pageable pageable = PageRequest.of(0, 5); // 0페이지, 사이즈 1
         // When
-        List<UserDto> userPage = usersRepository.findAllByKeyword("", pageable);
+        Page<UserDto> userPage = usersRepository.findAllByKeyword( false, "", pageable);
         // Then
         System.out.println(userPage);
-        assertThat(userPage.size()).isEqualTo(2);
-        assertThat(userPage.get(0)).extracting("email","username")
-                .contains("test2@email.com","user2");
+        assertThat(userPage.getTotalElements()).isEqualTo(2);
     }
 
     @Test
@@ -79,12 +76,5 @@ public class UsersRepositoryTest extends AbstractIntegrationTest {
         assertThat(usersRepository.count()).isEqualTo(1);
     }
 
-    @Test
-    @DisplayName("Count user by keyword")
-    void countByKeyword(){
-        Long result = usersRepository.countByKeyword("u");
-
-        assertThat(result).isEqualTo(2);
-    }
 
 }

@@ -1,43 +1,75 @@
 package dev.charles.SimpleService.users.repository;
 
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dev.charles.SimpleService.users.domain.Users;
 import dev.charles.SimpleService.users.dto.QUserDto;
 import dev.charles.SimpleService.users.dto.UserDto;
-import lombok.RequiredArgsConstructor;
+import dev.charles.SimpleService.utils.FixedPageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.Querydsl;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import java.util.List;
+import java.util.Objects;
 
 import static dev.charles.SimpleService.users.domain.QUsers.users;
 
-
-@RequiredArgsConstructor
-public class CustomizedUsersRepositoryImpl implements CustomizedUsersRepository{
+public class CustomizedUsersRepositoryImpl extends QuerydslRepositorySupport implements CustomizedUsersRepository{
     private final JPAQueryFactory queryFactory;
 
+    public CustomizedUsersRepositoryImpl(JPAQueryFactory queryFactory) {
+        super(Users.class);
+        this.queryFactory = queryFactory;
+    }
+
     @Override
-    public List<UserDto> findAllByKeyword(String keyword, Pageable pageable) {
-                return queryFactory
+    public Page<UserDto> findAllByKeyword(Boolean isSearchMode, String keyword, Pageable pageable) {
+//        List<Long> ids = queryFactory
+//                .select(users.id)
+//                .from(users)
+//                .where(users.username.likeIgnoreCase("%"+keyword + "%"))
+//                .orderBy(users.id.desc())
+//                .limit(pageable.getPageSize())
+//                .offset((long) pageable.getPageSize() * pageable.getPageNumber())
+//                .fetch();
+//        if(ids.isEmpty()){
+//            return null;
+//        }
+
+        JPAQuery<UserDto> query =queryFactory
                 .select(new QUserDto(users.email, users.username))
                 .from(users)
                 .where(
                         users.username.likeIgnoreCase("%"+keyword + "%")
                 )
-                .orderBy(users.id.desc())
-                .limit(pageable.getPageSize())
-                .offset((long) pageable.getPageSize() * pageable.getPageNumber())
-                .fetch();
+                .orderBy(users.id.desc());
+
+//        List<UserDto> coveringIndexList = queryFactory
+//                .select(new QUserDto(users.email, users.username))
+//                .from(users)
+//                .where(
+//                        users.id.in(ids)
+//                )
+//                .orderBy(users.id.desc())
+//                .fetch();
+
+
+        JPQLQuery<UserDto> pagination = querydsl().applyPagination(pageable, query);
+
+        if(isSearchMode) {
+            int fixedPageCount = 10 * pageable.getPageSize();
+            return new PageImpl<>(pagination.fetch(), pageable, fixedPageCount);
+        }
+        Long totalCount = pagination.fetchCount();
+        Pageable requestPage = new FixedPageRequest(pageable, pagination.fetchCount());
+        return new PageImpl<>(querydsl().applyPagination(requestPage, query).fetch(), pageable, totalCount);
     }
 
-    @Override
-    public Long countByKeyword(String keyword) {
-        return queryFactory
-                .select(users.count())
-                .from(users)
-                .where(
-                        users.username.likeIgnoreCase("%"+keyword + "%")
-                )
-                .fetchOne();
+    private Querydsl querydsl() {
+        return Objects.requireNonNull(getQuerydsl());
     }
 
 }
