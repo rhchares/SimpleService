@@ -1,29 +1,41 @@
 package dev.charles.SimpleService.comments.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import dev.charles.SimpleService.comments.domain.QComments;
+import dev.charles.SimpleService.comments.domain.Comments;
 import dev.charles.SimpleService.comments.dto.CommentsResponseDto;
 import dev.charles.SimpleService.comments.dto.QCommentsResponseDto;
-import dev.charles.SimpleService.users.domain.QUsers;
+import dev.charles.SimpleService.posts.domain.Posts;
 import dev.charles.SimpleService.users.dto.QUserDto;
 import dev.charles.SimpleService.users.dto.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.Querydsl;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
+import java.util.Objects;
 
 import static dev.charles.SimpleService.comments.domain.QComments.comments;
 import static dev.charles.SimpleService.users.domain.QUsers.users;
 
 
-@RequiredArgsConstructor
-public class CustomizedCommentsRepositoryImpl implements CustomizedCommentsRepository {
+public class CustomizedCommentsRepositoryImpl extends QuerydslRepositorySupport  implements CustomizedCommentsRepository {
     private final JPAQueryFactory queryFactory;
 
+    public CustomizedCommentsRepositoryImpl(JPAQueryFactory queryFactory) {
+        super(Comments.class);
+        this.queryFactory = queryFactory;
+    }
+
+
     @Override
-    public List<CommentsResponseDto> findAllParentsByPostId(Long postId, Pageable pageable) {
-        return queryFactory
+    public Page<CommentsResponseDto> findAllParentsByPostId(Long postId, Pageable pageable) {
+        JPAQuery<CommentsResponseDto> query = queryFactory
                 .select(new QCommentsResponseDto(comments.content
                         ,comments.createdAt
                         ,comments.updatedAt, new QUserDto(comments.createdBy.username,
@@ -35,15 +47,16 @@ public class CustomizedCommentsRepositoryImpl implements CustomizedCommentsRepos
                         comments.post.id.eq(postId),
                         comments.parentComment.isNull()
                 )
-                .orderBy(comments.createdAt.desc())
-                .limit(pageable.getPageSize())
-                .offset((long) pageable.getPageSize() * pageable.getPageNumber())
-                .fetch();
+                .orderBy(comments.createdAt.desc());
+
+        JPQLQuery<CommentsResponseDto> pagination = querydsl().applyPagination(pageable,query);
+        Long totalCount = pagination.fetchCount();
+        return new PageImpl<>(pagination.fetch(), pageable, totalCount);
     }
 
     @Override
-    public List<CommentsResponseDto> findAllChildrenByParentId(Long parentId, Pageable pageable) {
-        return queryFactory
+    public Page<CommentsResponseDto> findAllChildrenByParentId(Long parentId, Pageable pageable) {
+        JPAQuery<CommentsResponseDto> query = queryFactory
                 .select(Projections.fields(CommentsResponseDto.class
                         ,comments.content
                         ,comments.createdAt
@@ -57,28 +70,14 @@ public class CustomizedCommentsRepositoryImpl implements CustomizedCommentsRepos
                 .where(
                         comments.parentComment.id.eq(parentId)
                 )
-                .orderBy(comments.createdAt.desc())
-                .limit(pageable.getPageSize())
-                .offset((long) pageable.getPageSize() * pageable.getPageNumber())
-                .fetch();
+                .orderBy(comments.createdAt.desc());
+        JPQLQuery<CommentsResponseDto> pagination = querydsl().applyPagination(pageable, query);
+        Long totalCount = pagination.fetchCount();
+        return new PageImpl<>(pagination.fetch(), pageable, totalCount);
     }
 
-    @Override
-    public Long countParentsByPostId(Long postId) {
-        return queryFactory.select(comments.count())
-                .from(comments)
-                .where(
-                        comments.post.id.eq(postId),
-                        comments.parentComment.isNull()
-                ).fetchOne();
+    private Querydsl querydsl() {
+        return Objects.requireNonNull(getQuerydsl());
     }
 
-    @Override
-    public Long countChildrenByParentId(Long parentId) {
-        return queryFactory.select(comments.count())
-                .from(comments)
-                .where(
-                        comments.parentComment.id.eq(parentId)
-                ).fetchOne();
-    }
 }
