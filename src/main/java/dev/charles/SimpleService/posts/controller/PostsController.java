@@ -47,8 +47,8 @@ public class PostsController {
 
     @GetMapping(path = "/paged")
     public ResponseEntity<Page<PostDto>> getPostsByKeyword(
-            @NotNull @RequestParam(value = "isSearchMode") Boolean isSearchMode,
-            @RequestParam(value = "keyword" , required = false) String keyword,
+            @NotNull @RequestParam(value = "isSearchMode", defaultValue = "false") Boolean isSearchMode,
+            @RequestParam(value = "keyword" , required = false, defaultValue = "") String keyword,
             @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber){
         Page<PostDto> result = postsService.getAllPosts(isSearchMode, keyword, pageNumber);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -56,8 +56,8 @@ public class PostsController {
 
     @GetMapping(path = "/paged/user")
     public ResponseEntity<Page<PostDto>> getPostsByKeywordAndEmail(
-            @NotNull @RequestParam(value = "isSearchMode") Boolean isSearchMode,
-            @RequestParam(value = "keyword" , required = false) String keyword,
+            @NotNull @RequestParam(value = "isSearchMode", defaultValue = "false") Boolean isSearchMode,
+            @RequestParam(value = "keyword" , required = false, defaultValue = "") String keyword,
             @NotNull @RequestParam(value = "email") String email,
             @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber){
         Page<PostDto> result = postsService.getAllPostsByUser(isSearchMode, email, keyword, pageNumber);
