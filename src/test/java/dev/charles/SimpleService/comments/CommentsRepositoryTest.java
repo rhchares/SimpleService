@@ -101,6 +101,16 @@ public class CommentsRepositoryTest extends AbstractIntegrationTest {
                 });
             }
 
+            @Test
+            @DisplayName("Then you can get empty result when can't find any ids.")
+            void findNothingByPostId() {
+                Page<CommentsResponseDto> result =  commentsRepository.findAllParentsByPostId(98321L, pageable);
+                assertSoftly((softly)-> {
+                    softly.assertThat(result.getNumber()).isEqualTo(0);
+                    softly.assertThat(result.getTotalElements()).isEqualTo(0);
+                });
+            }
+
         }
 
         @Nested
@@ -121,6 +131,16 @@ public class CommentsRepositoryTest extends AbstractIntegrationTest {
                     softly.assertThat(result)
                             .extracting(CommentsResponseDto::getContent)
                             .allMatch(content -> content.contains("reply"));
+                });
+            }
+
+            @Test
+            @DisplayName("Then you can get empty result")
+            void findNothingByPostId() {
+                Page<CommentsResponseDto> result =  commentsRepository.findAllChildrenByParentId(98765431L, pageable);
+                assertSoftly((softly)-> {
+                    softly.assertThat(result.getNumber()).isEqualTo(0);
+                    softly.assertThat(result.getTotalElements()).isEqualTo(0);
                 });
             }
         }

@@ -154,7 +154,7 @@ public class PostsRepositoryTest extends AbstractIntegrationTest {
             usersRepository.save(user1);
             usersRepository.save(user2);
 
-            for (int i = 0; i < 120; i++) {
+            for (int i = 0; i < 50; i++) {
                 PostDto dto =  PostDto.builder()
                         .title(postTitle.get(i%5))
                         .content("none").build();
@@ -180,24 +180,25 @@ public class PostsRepositoryTest extends AbstractIntegrationTest {
             }
 
             @ParameterizedTest
-            @CsvSource({", 0", "the, 100"})
+            @CsvSource({"the, 0, 100","a, 0, 100", "asdasdgiojwrgiow, 0, 0"})
             @DisplayName("Then you can receive pagination of postDto by keyword")
-            void findAllByKeywordTest(String keyword, int pageNumber) {
+            void findAllByKeywordTest(String keyword, int pageNumber, int expectedTotal) {
+                System.out.println("total: " +postsRepository.findAll().size());
                 pageable = PageRequest.of(pageNumber, pageSize);
                 Page<PostDto> page = postsRepository.findAllByKeyword(isSearchMode, keyword,  pageable );
                 assertThat(page.getNumber()).isEqualTo(pageNumber);
-                assertThat(page.getTotalElements()).isEqualTo(100L);
+                assertThat(page.getTotalElements()).isEqualTo(expectedTotal);
             }
 
             @ParameterizedTest
-            @CsvSource({", vfdfdf, 5", ", sample@email.com, 1", ", sample2@email.com, 3"})
+            @CsvSource({", vfdfdf, 0, 0", ", sample@email.com, 1, 100", ", sample2@email.com, 0, 100"})
             @DisplayName("Then you can receive a pagination of postDto  by keyword and email")
-            void findAllByKeywordByEmailTest(String keyword, String email, int pageNumber) {
+            void findAllByKeywordByEmailTest(String keyword, String email, Integer pageNumber, Long expedtedTotal) {
                 pageable = PageRequest.of(pageNumber, pageSize);
                 Page<PostDto> page = postsRepository.findAllByKeywordAndEmail(isSearchMode, keyword, email, pageable);
                 // then
                 assertThat(page.getNumber()).isEqualTo(pageNumber);
-                assertThat(page.getTotalElements()).isEqualTo(100L);
+                assertThat(page.getTotalElements()).isEqualTo(expedtedTotal);
             }
         }
 
@@ -208,24 +209,23 @@ public class PostsRepositoryTest extends AbstractIntegrationTest {
             void setup(){
                 isSearchMode= false;
             }
-//            72 7
             @ParameterizedTest
-            @CsvSource({", 0, 0, 120", "the, 100, 7, 72"})
+            @CsvSource({", 0, 50", "the, 0, 30", "asdasdgiojwrgiow, 0, 0"})
             @DisplayName("Then you can receive pagination of postDto by keyword")
-            void findAllByKeywordTest(String keyword, int pageNumber, int expectedPageNumber,int expectedTotal) {
+            void findAllByKeywordTest(String keyword, int pageNumber, int expectedTotal) {
                 pageable = PageRequest.of(pageNumber, pageSize);
                 Page<PostDto> page = postsRepository.findAllByKeyword(isSearchMode, keyword,  pageable );
-                assertThat(page.getNumber()).isEqualTo(expectedPageNumber);
+                assertThat(page.getNumber()).isEqualTo(pageNumber);
                 assertThat(page.getTotalElements()).isEqualTo(expectedTotal);
             }
             @ParameterizedTest
-            @CsvSource({", dsd, 0, 0, 0", "the, sample@email.com, 100, 3, 36", "the, sample2@email.com, 100, 3, 36"})
+            @CsvSource({", dsd, 0, 0", "the, sample@email.com, 0, 15", "the, sample2@email.com, 0, 15"})
             @DisplayName("Then you can receive a pagination of postDto  by keyword and email")
-            void findAllByKeywordByEmailTest(String keyword, String email, int pageNumber, int expectedPageNumber,int expectedTotal){
+            void findAllByKeywordByEmailTest(String keyword, String email, int pageNumber, int expectedTotal){
                 pageable = PageRequest.of(pageNumber, pageSize);
                 Page<PostDto> page = postsRepository.findAllByKeywordAndEmail(isSearchMode, keyword, email, pageable);
                 assertSoftly(softly->{
-                    softly.assertThat(page.getNumber()).isEqualTo(expectedPageNumber);
+                    softly.assertThat(page.getNumber()).isEqualTo(pageNumber);
                     softly.assertThat(page.getTotalElements()).isEqualTo(expectedTotal);
                 });
             }

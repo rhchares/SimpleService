@@ -7,6 +7,8 @@ import dev.charles.SimpleService.users.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,16 +57,16 @@ public class UsersRepositoryTest extends AbstractIntegrationTest {
         assertThat(foundUser.getUsername()).isEqualTo("user1");
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({"false, user, 2", "true, user, 100", "true, usdsdder, 0"})
     @DisplayName("Get pagination of users that is sorted by creation date descending (newest first)")
-    void findAllByOrderByCreatedAtDesc_shouldReturnPagedData() {
+    void findAllByOrderByCreatedAtDesc_shouldReturnPagedData(Boolean isSearchMode, String keyword, int expectedTotal) {
         // Given
-        Pageable pageable = PageRequest.of(0, 5); // 0페이지, 사이즈 1
+        Pageable pageable = PageRequest.of(0, 10); // 0페이지, 사이즈 1
         // When
-        Page<UserDto> userPage = usersRepository.findAllByKeyword( false, "", pageable);
+        Page<UserDto> userPage = usersRepository.findAllByKeyword( isSearchMode, keyword == null? "": keyword, pageable);
         // Then
-        System.out.println(userPage);
-        assertThat(userPage.getTotalElements()).isEqualTo(2);
+        assertThat(userPage.getTotalElements()).isEqualTo(expectedTotal);
     }
 
     @Test
