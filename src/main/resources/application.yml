@@ -6,12 +6,15 @@ spring:
       enabled: always
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
+
+
     show-sql: true
     open-in-view: false
     properties:
       hibernate:
         format_sql: true
+        dialect: dev.charles.SimpleBlogAPI.config.CustomPostgreSQLDialect
   security:
     oauth2:
       resourceserver:
